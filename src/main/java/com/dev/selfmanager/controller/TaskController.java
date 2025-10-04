@@ -71,6 +71,26 @@ public class TaskController {
 
     }
 
+    public void updateTaskStatus(TaskEntity updateTask, TaskStatus status) {
+        
+        //validate the task status
+
+        //Task model validation 
+        for(TaskEntity task : taskCollection) {
+            if(updateTask.equals(task)) {
+
+                task.setTaskStatus(status);
+                repository.updateTask(task);
+                repository.save();
+
+                return; //exit the method
+            } 
+        }
+
+        //task is not found
+        throw new NoSuchElementException("task " + updateTask + " not found.");
+    }
+
     public void updateByTaskName(String taskName, String newTaskTitle, String newTaskDescription) {
         
     }
@@ -81,11 +101,13 @@ public class TaskController {
 
     //find task by full name and return the task instance matched. 
     public TaskEntity findTaskByName(String taskTitle) {
-        /*Assist in viewing the list of task  
+        /* To find a fetch a data of a specific task.  
+         * - Required a full name of a task.
          * - To have the program return a list of task by category/day
          * use TaskList instead.
         */
 
+        //Validation.
         if(taskTitle == null || taskTitle.trim().isEmpty()) {
             throw new IllegalArgumentException("Task Title is null");
         }

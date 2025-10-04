@@ -10,6 +10,8 @@ import java.util.NoSuchElementException;
 
 import com.dev.selfmanager.controller.TaskController;
 import com.dev.selfmanager.model.TaskEntity;
+import com.dev.selfmanager.model.TaskStatus;
+import com.dev.selfmanager.util.Debugger;
 
 public class App
 {
@@ -26,7 +28,7 @@ public class App
 
         while(session != 0) {
 
-            System.out.print("Select your option: \nc - create new task\nf - find task\nl - list all tasks\nq - exit\n");
+            System.out.print("Select your option: \nc - create new task\nf - find task\nl - list all tasks\nu - update task\nq - exit\n");
             choice = in.nextLine(); 
 
             switch(choice) {
@@ -38,6 +40,9 @@ public class App
                     break;
                 case "l":
                     listAllTask();
+                    break;
+                case "u":
+                    updateTask();
                     break;
                 case "q":
                     session = 0;
@@ -77,7 +82,6 @@ public class App
         String taskName = userIn.nextLine();
 
         try {
-
             System.out.println(taskControl.findTaskByName(taskName).toString());
 
         } catch(IllegalArgumentException e) {
@@ -92,6 +96,70 @@ public class App
 
         for(TaskEntity taskCollection : taskControl.getAllTasks()) {
             System.out.println(taskCollection.toString());
+        }
+    }
+
+    public static void updateTask() {
+
+        Scanner userIn = new Scanner(System.in);
+        String choice = null;
+        boolean valid = true;
+
+        while(valid) {
+
+            try {
+                
+                System.out.print("Write the task name to update: ");
+                String taskName = userIn.nextLine(); 
+
+                //debug 
+                Debugger.showString(taskName);
+
+                System.out.println("Choose what to update: \ns - task status");
+                choice = userIn.nextLine();
+                
+                TaskEntity updatedTask = taskControl.findTaskByName(taskName);
+                System.out.println("Current data: \n" + updatedTask.toString());
+                switch (choice) {
+                    case "s":
+                        boolean validStatus = true; 
+                        while(validStatus) {
+                            System.out.println("Current status: " + updatedTask.getTaskStatus());
+                            System.out.print("Please enter a new valid status: \n1 - Completed\n2 - Pending\n3- Cancelled\n>");
+                            int status = userIn.nextInt();
+                            switch (status) {
+                                case 1: 
+                                    taskControl.updateTaskStatus(updatedTask, TaskStatus.COMPLETED); 
+                                    validStatus = false;
+                                    break;
+                                case 2: 
+                                    taskControl.updateTaskStatus(updatedTask, TaskStatus.PENDING);
+                                    validStatus = false;
+                                    break;
+                                case 3: 
+                                    taskControl.updateTaskStatus(updatedTask, TaskStatus.CANCELLED);
+                                    validStatus = false;
+                                default:
+                                    System.out.println("Invalid task status... please try again.");
+                                    break;
+                            }
+
+                            //interface response
+                            System.out.println("Task Successfully updated.");
+
+                            //Show updated data.
+                            System.out.println("Updated data: " + taskControl.findTaskByName(taskName).toString());
+                        }
+                        break;
+                
+                    default:
+                        System.out.println("Invalid choice...");
+                        valid = true;
+                        break;
+                }
+            } catch (NoSuchElementException | IllegalArgumentException e) {
+                System.out.println("Error :" + e.getMessage());
+            }
         }
     }
 }

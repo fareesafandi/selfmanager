@@ -90,6 +90,7 @@ public class TaskSQLITERepository implements taskRepositoryInterface {
 
         String t_id = updatedTask.getTaskID().toString(); 
 
+        //TODO: Sqlite Error when updating database. NOTE: near t_title?? 
         String updateQuery = 
         "UPDATE tasks" +
         "SET t_title = ?," + // 1 - t_title
@@ -110,8 +111,10 @@ public class TaskSQLITERepository implements taskRepositoryInterface {
             updateTask.setString(5, updatedTask.getTaskTime().toString());
             updateTask.setString(6, updatedTask.getTaskID().toString());
 
+            updateTask.executeUpdate();
+
         } catch (SQLException e) {
-            // TODO: handle exception
+            System.out.println("Error updating task " + updatedTask.getTaskTitle() + " : " + e.getMessage());
         }
     }
    
@@ -169,7 +172,12 @@ public class TaskSQLITERepository implements taskRepositoryInterface {
             connection.commit();
 
         } catch (SQLException e) {
-            System.out.println("Error committing changes: " + e.getMessage());
+            System.out.println("\nError committing changes: " + e.getMessage() + "\nrolling back...\n");
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                System.out.println("Error rolling back changes :" + ex.getMessage());
+            }
         }
     }
 }
